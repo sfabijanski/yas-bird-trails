@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>York County Birding Trail</title>
+  <link rel="icon" href="images/trail-sign.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+    #banner {
+      flex: 0 0 auto;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      background: #2e7d32;
+      color: #fff;
+      padding: 0 16px;
+      font-size: 1.15em;
+      font-weight: bold;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      z-index: 1100;
+    }
+    #layout {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+    }
+    #sidebar {
+      width: 300px;
+      flex-shrink: 0;
+      overflow-y: auto;
+      border-right: 1px solid #ccc;
+      background: #f8f9fa;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    .trail-sign-img {
+      display: block;
+      width: 110px;
+      height: auto;
+      margin: 8px auto 10px auto;
+      border-radius: 6px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.3);
+    }
+    #sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #sidebar-close {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      color: #555;
+      padding: 0 4px;
+    }
+    #map {
+      flex-grow: 1;
+      height: 100%;
+    }
+    .site-item {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      cursor: pointer;
+    }
+    .site-item:hover {
+      background: #e9ecef;
+    }
+    .site-title {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .site-tags {
+      margin-top: 5px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .tag-pill {
+      font-size: 0.72em;
+      padding: 2px 7px;
+      border-radius: 10px;
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #c8e6c9;
+      white-space: nowrap;
+    }
+
+    /* Custom marker: a mini trail-placard pin, cropped from the real trail sign artwork */
+    .trail-marker {
+      position: relative;
+      width: 28px;
+      height: 35px;
+      background-color: #391909;
+      background-image: url('images/marker-bird.png');
+      background-size: cover;
+      background-position: center;
+      border: 2px solid #ffffff;
+      border-radius: 5px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.45);
+    }
+    .trail-marker::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: -7px;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 7px solid #391909;
+    }
+
+    /* Popup synopsis */
+    .popup-title {
+      font-weight: bold;
+      font-size: 1.05em;
+      margin-bottom: 2px;
+    }
+    .popup-address {
+      color: #555;
+      font-size: 0.85em;
+      margin-bottom: 6px;
+    }
+    .popup-synopsis {
+      margin: 0 0 8px 0;
+      font-size: 0.9em;
+    }
+    .popup-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .popup-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.85em;
+      text-decoration: none;
+      padding: 5px 9px;
+      border-radius: 4px;
+      border: 1px solid #2e7d32;
+      color: #2e7d32;
+      background: #fff;
+      cursor: pointer;
+    }
+    .popup-btn:hover {
+      background: #e8f5e9;
+    }
+    .popup-btn.filled {
+      background: #2e7d32;
+      color: #fff;
+    }
+    .popup-btn.filled:hover {
+      background: #256428;
+    }
+
+    /* Modal */
+    #modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1200;
+      align-items: center;
+      justify-content: center;
+    }
+    #modal-overlay.open {
+      display: flex;
+    }
+    #modal-box {
+      background: #fff;
+      max-width: 600px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      border-radius: 8px;
+      padding: 20px 24px;
+      position: relative;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+    #modal-close {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      color: #555;
+    }
+    #modal-close:hover {
+      color: #000;
+    }
+    #modal-box h2 {
+      margin: 0 0 4px 0;
+      padding-right: 24px;
+    }
+    #modal-box .modal-address {
+      color: #555;
+      margin-bottom: 10px;
+    }
+    #modal-box .modal-photos-cta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      background: #2e7d32;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 0.92em;
+    }
+    #modal-box .modal-photos-cta:hover {
+      background: #256428;
+    }
+    #modal-box .modal-photos-cta .cta-icon {
+      font-size: 1.3em;
+    }
+    #modal-box .modal-photos-cta .cta-text strong {
+      display: block;
+      font-size: 0.95em;
+    }
+    #modal-box .modal-photos-cta .cta-text span {
+      font-size: 0.85em;
+      opacity: 0.9;
+    }
+    #modal-box .modal-section {
+      margin-bottom: 14px;
+    }
+    #modal-box .modal-section h4 {
+      margin: 0 0 4px 0;
+      font-size: 0.8em;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #2e7d32;
+    }
+    #modal-box .modal-section p {
+      margin: 0;
+      font-size: 0.92em;
+      white-space: pre-line;
+    }
+
+    .sidebar-toggle-control {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar-toggle-control {
+        display: block;
+      }
+      #sidebar-close {
+        display: block;
+      }
+      #sidebar {
+        position: fixed;
+        top: 48px;
+        left: 0;
+        bottom: 0;
+        width: 85%;
+        max-width: 320px;
+        z-index: 1050;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.35);
+      }
+      #sidebar.open {
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="banner">York County Birding Trail Map</div>
+
+  <div id="layout">
+    <div id="sidebar">
+      <div id="sidebar-header">
+        <h2>YAS Birding Sites</h2>
+        <button id="sidebar-close" aria-label="Close site list">&times;</button>
+      </div>
+      <img class="trail-sign-img" src="images/trail-sign.png" alt="York County Birding Trail placard sign">
+      <div id="site-list">Loading sites...</div>
+    </div>
+    <div id="map"></div>
+  </div>
+
+  <div id="modal-overlay">
+    <div id="modal-box">
+      <button id="modal-close" aria-label="Close">&times;</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([39.81, -76.88], 10);
+
+    const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles style by <a href="https://www.hotosm.org/" target="_blank">Humanitarian OpenStreetMap Team</a>',
+      maxZoom: 19
+    });
+
+    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+      maxZoom: 19
+    });
+
+    streetLayer.addTo(map);
+    L.control.layers({ 'Street Map': streetLayer, 'Satellite': satelliteLayer }, null, { position: 'topright' }).addTo(map);
+
+    let siteLayer = null;
+    const ResetViewControl = L.Control.extend({
+      options: { position: 'topleft' },
+      onAdd: function () {
+        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+        const link = L.DomUtil.create('a', '', container);
+        link.href = '#';
+        link.title = 'Zoom to fit all sites';
+        link.innerHTML = '&#9974;';
+        link.setAttribute('role', 'button');
+        link.setAttribute('aria-label', 'Zoom to fit all sites');
+        L.DomEvent.on(link, 'click', (e) => {
+          L.DomEvent.stop(e);
+          if (siteLayer) map.fitBounds(siteLayer.getBounds(), { padding: [20, 20] });
+        });
+        return container;
+      }
+    });
+    map.addControl(new ResetViewControl());
+
+    const SidebarToggleControl = L.Control.extend({
+      options: { position: 'topleft' },
+      onAdd: function () {
+        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control sidebar-toggle-control');
+        const link = L.DomUtil.create('a', '', container);
+        link.href = '#';
+        link.title = 'Show/hide site list';
+        link.innerHTML = '&#9776;';
+        link.setAttribute('role', 'button');
+        link.setAttribute('aria-label', 'Show or hide the site list');
+        L.DomEvent.on(link, 'click', (e) => {
+          L.DomEvent.stop(e);
+          document.getElementById('sidebar').classList.toggle('open');
+        });
+        return container;
+      }
+    });
+    map.addControl(new SidebarToggleControl());
+
+    document.getElementById('sidebar-close').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+    });
+
+    const birdIcon = L.divIcon({
+      className: '',
+      html: '<div class="trail-marker"></div>',
+      iconSize: [28, 42],
+      iconAnchor: [14, 42],
+      popupAnchor: [0, -39]
+    });
+
+    function synopsis(text, maxLen = 220) {
+      if (!text) return '';
+      if (text.length <= maxLen) return text;
+      const cut = text.slice(0, maxLen);
+      return cut.slice(0, cut.lastIndexOf(' ')) + '&hellip;';
+    }
+
+    function sidebarPills(props) {
+      const tags = [...(props.habitat_tags || []).slice(0, 2), ...(props.season_tags || []).slice(0, 1)];
+      if (!tags.length) return '';
+      return `<div class="site-tags">${tags.map(t => `<span class="tag-pill">${t}</span>`).join('')}</div>`;
+    }
+
+    function directionsUrl(lat, lng) {
+      return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    }
+
+    const modalOverlay = document.getElementById('modal-overlay');
+    const modalContent = document.getElementById('modal-content');
+
+    function openModal(props) {
+      const section = (label, value) => value
+        ? `<div class="modal-section"><h4>${label}</h4><p>${value}</p></div>`
+        : '';
+      modalContent.innerHTML = `
+        <h2>${props.name}</h2>
+        <div class="modal-address">${props.address || ''}</div>
+        <a class="modal-photos-cta" href="${props.url}" target="_blank" rel="noopener">
+          <span class="cta-icon">&#128247;</span>
+          <span class="cta-text">
+            <strong>See photos &amp; the full site guide</strong>
+            <span>Opens the York Audubon page for ${props.name} &rarr;</span>
+          </span>
+        </a>
+        ${section('Property Manager', props.property_manager)}
+        ${section('Hours', props.hours)}
+        ${section('Parking', props.parking)}
+        ${section('Restrooms', props.restrooms)}
+        ${section('Safety Reminders', props.safety_reminders)}
+        ${section('Best Birding', props.best_birding)}
+        ${section('Description', props.description)}
+      `;
+      modalOverlay.classList.add('open');
+    }
+
+    function closeModal() {
+      modalOverlay.classList.remove('open');
+    }
+
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    const markers = {};
+    const sidebarList = document.getElementById('site-list');
+    sidebarList.innerHTML = '';
+
+    // Load GeoJSON data
+    fetch('sites.geojson')
+      .then(response => response.json())
+      .then(data => {
+        siteLayer = L.geoJSON(data, {
+          pointToLayer: function (feature, latlng) {
+            return L.marker(latlng, { icon: birdIcon });
+          },
+          onEachFeature: function (feature, layer) {
+            const props = feature.properties;
+            const coords = feature.geometry.coordinates;
+            const lat = coords[1], lng = coords[0];
+            const popupId = 'popup-' + Math.random().toString(36).slice(2);
+            const zoomId = 'zoom-' + Math.random().toString(36).slice(2);
+
+            const popupContent = `
+              <div class="popup-title">${props.name}</div>
+              <div class="popup-address">${props.address || ''}</div>
+              ${sidebarPills(props)}
+              <p class="popup-synopsis">${synopsis(props.description)}</p>
+              <div class="popup-actions">
+                <a class="popup-btn" href="${directionsUrl(lat, lng)}" target="_blank" rel="noopener">
+                  <span>&#129517;</span> Directions
+                </a>
+                <button class="popup-btn" id="${zoomId}">
+                  <span>&#128269;</span> Zoom In
+                </button>
+                <button class="popup-btn filled" id="${popupId}">Full Details</button>
+              </div>
+            `;
+            layer.bindPopup(popupContent, { minWidth: 230 });
+            layer.on('popupopen', () => {
+              const btn = document.getElementById(popupId);
+              if (btn) btn.addEventListener('click', () => openModal(props));
+              const zoomBtn = document.getElementById(zoomId);
+              if (zoomBtn) zoomBtn.addEventListener('click', () => map.flyTo([lat, lng], 17));
+            });
+            markers[props.name] = layer;
+
+            // Build sidebar element
+            const item = document.createElement('div');
+            item.className = 'site-item';
+            item.innerHTML = `
+              <div class="site-title">${props.name}</div>
+              <div style="font-size: 0.85em; color: #555;">${props.address || ''}</div>
+              ${sidebarPills(props)}
+            `;
+            item.addEventListener('click', () => {
+              // Note: Leaflet expects [lat, lng], GeoJSON is [lng, lat]
+              map.flyTo([lat, lng], 14);
+              layer.openPopup();
+              if (window.matchMedia('(max-width: 768px)').matches) {
+                document.getElementById('sidebar').classList.remove('open');
+              }
+            });
+            sidebarList.appendChild(item);
+          }
+        }).addTo(map);
+        map.fitBounds(siteLayer.getBounds(), { padding: [20, 20] });
+      })
+      .catch(err => console.error('Error loading GeoJSON:', err));
+  </script>
+</body>
+</html>
