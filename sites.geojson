@@ -24,7 +24,11 @@
           "Year-Round",
           "Spring",
           "Fall"
-        ]
+        ],
+        "site_type": "state_park",
+        "ada_accessible": true,
+        "feeder_station": true,
+        "restroom_available": true
       },
       "geometry": {
         "type": "Point",
@@ -55,7 +59,11 @@
         ],
         "season_tags": [
           "Year-Round"
-        ]
+        ],
+        "site_type": "state_park",
+        "ada_accessible": true,
+        "feeder_station": true,
+        "restroom_available": true
       },
       "geometry": {
         "type": "Point",
@@ -85,7 +93,11 @@
         ],
         "season_tags": [
           "Year-Round"
-        ]
+        ],
+        "site_type": "county_park",
+        "ada_accessible": false,
+        "feeder_station": false,
+        "restroom_available": true
       },
       "geometry": {
         "type": "Point",
@@ -116,7 +128,11 @@
         ],
         "season_tags": [
           "Year-Round"
-        ]
+        ],
+        "site_type": "county_park",
+        "ada_accessible": false,
+        "feeder_station": false,
+        "restroom_available": true
       },
       "geometry": {
         "type": "Point",
@@ -147,7 +163,11 @@
         ],
         "season_tags": [
           "Year-Round"
-        ]
+        ],
+        "site_type": "county_park",
+        "ada_accessible": false,
+        "feeder_station": false,
+        "restroom_available": true
       },
       "geometry": {
         "type": "Point",
@@ -178,7 +198,11 @@
         ],
         "season_tags": [
           "Year-Round"
-        ]
+        ],
+        "site_type": "county_park",
+        "ada_accessible": false,
+        "feeder_station": true,
+        "restroom_available": true
       },
       "geometry": {
         "type": "Point",
@@ -209,7 +233,11 @@
         ],
         "season_tags": [
           "Year-Round"
-        ]
+        ],
+        "site_type": "other",
+        "ada_accessible": true,
+        "feeder_station": false,
+        "restroom_available": true
       },
       "geometry": {
         "type": "Point",
@@ -241,7 +269,11 @@
         "season_tags": [
           "Spring",
           "Fall"
-        ]
+        ],
+        "site_type": "other",
+        "ada_accessible": false,
+        "feeder_station": false,
+        "restroom_available": true
       },
       "geometry": {
         "type": "Point",
@@ -272,7 +304,11 @@
         ],
         "season_tags": [
           "Year-Round"
-        ]
+        ],
+        "site_type": "county_park",
+        "ada_accessible": true,
+        "feeder_station": true,
+        "restroom_available": true
       },
       "geometry": {
         "type": "Point",
@@ -304,7 +340,11 @@
         "season_tags": [
           "Spring",
           "Fall"
-        ]
+        ],
+        "site_type": "other",
+        "ada_accessible": true,
+        "feeder_station": false,
+        "restroom_available": false
       },
       "geometry": {
         "type": "Point",
@@ -338,7 +378,11 @@
           "Winter",
           "Spring",
           "Fall"
-        ]
+        ],
+        "site_type": "other",
+        "ada_accessible": true,
+        "feeder_station": false,
+        "restroom_available": false
       },
       "geometry": {
         "type": "Point",
@@ -367,7 +411,11 @@
           "River",
           "Forest/Woodland"
         ],
-        "season_tags": []
+        "season_tags": [],
+        "site_type": "other",
+        "ada_accessible": false,
+        "feeder_station": false,
+        "restroom_available": true
       },
       "geometry": {
         "type": "Point",
@@ -397,7 +445,11 @@
         ],
         "season_tags": [
           "Year-Round"
-        ]
+        ],
+        "site_type": "state_game_lands",
+        "ada_accessible": false,
+        "feeder_station": false,
+        "restroom_available": false
       },
       "geometry": {
         "type": "Point",
@@ -428,7 +480,11 @@
         ],
         "season_tags": [
           "Year-Round"
-        ]
+        ],
+        "site_type": "other",
+        "ada_accessible": true,
+        "feeder_station": false,
+        "restroom_available": true
       },
       "geometry": {
         "type": "Point",
@@ -459,7 +515,11 @@
         ],
         "season_tags": [
           "Year-Round"
-        ]
+        ],
+        "site_type": "county_park",
+        "ada_accessible": false,
+        "feeder_station": false,
+        "restroom_available": false
       },
       "geometry": {
         "type": "Point",
@@ -491,7 +551,11 @@
         "season_tags": [
           "Spring",
           "Fall"
-        ]
+        ],
+        "site_type": "other",
+        "ada_accessible": false,
+        "feeder_station": false,
+        "restroom_available": true
       },
       "geometry": {
         "type": "Point",
@@ -523,7 +587,11 @@
         "season_tags": [
           "Spring",
           "Fall"
-        ]
+        ],
+        "site_type": "other",
+        "ada_accessible": false,
+        "feeder_station": false,
+        "restroom_available": false
       },
       "geometry": {
         "type": "Point",
@@ -553,7 +621,11 @@
         ],
         "season_tags": [
           "Year-Round"
-        ]
+        ],
+        "site_type": "county_park",
+        "ada_accessible": false,
+        "feeder_station": false,
+        "restroom_available": true
       },
       "geometry": {
         "type": "Point",
@@ -585,7 +657,11 @@
         "season_tags": [
           "Spring",
           "Fall"
-        ]
+        ],
+        "site_type": "other",
+        "ada_accessible": false,
+        "feeder_station": false,
+        "restroom_available": false
       },
       "geometry": {
         "type": "Point",
@@ -618,7 +694,11 @@
           "Year-Round",
           "Spring",
           "Fall"
-        ]
+        ],
+        "site_type": "county_park",
+        "ada_accessible": true,
+        "feeder_station": false,
+        "restroom_available": true
       },
       "geometry": {
         "type": "Point",
@@ -650,7 +730,11 @@
         "season_tags": [
           "Spring",
           "Fall"
-        ]
+        ],
+        "site_type": "other",
+        "ada_accessible": false,
+        "feeder_station": false,
+        "restroom_available": false
       },
       "geometry": {
         "type": "Point",
@@ -679,7 +763,11 @@
           "Forest/Woodland",
           "Creek/Stream"
         ],
-        "season_tags": []
+        "season_tags": [],
+        "site_type": "state_game_lands",
+        "ada_accessible": false,
+        "feeder_station": false,
+        "restroom_available": false
       },
       "geometry": {
         "type": "Point",
@@ -710,7 +798,11 @@
         ],
         "season_tags": [
           "Year-Round"
-        ]
+        ],
+        "site_type": "county_park",
+        "ada_accessible": true,
+        "feeder_station": false,
+        "restroom_available": true
       },
       "geometry": {
         "type": "Point",
@@ -742,7 +834,11 @@
         "season_tags": [
           "Spring",
           "Fall"
-        ]
+        ],
+        "site_type": "other",
+        "ada_accessible": false,
+        "feeder_station": false,
+        "restroom_available": true
       },
       "geometry": {
         "type": "Point",
@@ -770,7 +866,11 @@
           "Migration Hotspot",
           "Forest/Woodland"
         ],
-        "season_tags": []
+        "season_tags": [],
+        "site_type": "state_game_lands",
+        "ada_accessible": false,
+        "feeder_station": false,
+        "restroom_available": false
       },
       "geometry": {
         "type": "Point",

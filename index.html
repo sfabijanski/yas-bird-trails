@@ -86,6 +86,36 @@
       font-weight: bold;
       margin-bottom: 4px;
     }
+    .type-dot {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      margin-right: 6px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.25);
+      vertical-align: baseline;
+    }
+    .type-dot.state_park { background: #6d4c2a; }
+    .type-dot.county_park { background: #2e7d32; }
+    .type-dot.state_game_lands { background: #f1c40f; }
+    .type-dot.lancaster_conservancy { background: #e67e22; }
+    .type-dot.other { background: #2980b9; }
+    .site-icons {
+      margin-top: 5px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      color: #111;
+    }
+    .icon-glyph {
+      font-size: 16px;
+      line-height: 1;
+    }
+    .icon-feeder svg {
+      width: 20px;
+      height: 20px;
+      display: block;
+    }
     .site-tags {
       margin-top: 5px;
       display: flex;
@@ -144,7 +174,7 @@
     .popup-actions {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 5px;
     }
     .popup-btn {
       display: inline-flex;
@@ -152,7 +182,7 @@
       gap: 4px;
       font-size: 0.85em;
       text-decoration: none;
-      padding: 5px 9px;
+      padding: 5px 8px;
       border-radius: 4px;
       border: 1px solid #2e7d32;
       color: #2e7d32;
@@ -262,6 +292,45 @@
       display: none;
     }
 
+    #legend-panel {
+      display: none;
+      position: absolute;
+      bottom: 50px;
+      left: 10px;
+      z-index: 900;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.4);
+      padding: 10px 14px;
+      font-size: 0.85em;
+      max-width: 230px;
+    }
+    #legend-panel.open {
+      display: block;
+    }
+    .legend-title {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 3px 0;
+    }
+    .legend-row .type-dot {
+      margin-right: 0;
+    }
+    .legend-row .legend-marker {
+      transform: scale(0.7);
+      margin: 0 -4px;
+    }
+    .legend-divider {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 6px 0;
+    }
+
     @media (max-width: 768px) {
       .sidebar-toggle-control {
         display: block;
@@ -300,7 +369,12 @@
       <img class="trail-sign-img" src="images/trail-sign.png" alt="York County Birding Trail placard sign">
       <div id="site-list">Loading sites...</div>
     </div>
-    <div id="map"></div>
+    <div id="map">
+      <div id="legend-panel">
+        <div class="legend-title">Map Legend</div>
+        <div id="legend-content"></div>
+      </div>
+    </div>
   </div>
 
   <div id="modal-overlay">
@@ -367,6 +441,25 @@
     });
     map.addControl(new SidebarToggleControl());
 
+    const LegendToggleControl = L.Control.extend({
+      options: { position: 'topleft' },
+      onAdd: function () {
+        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+        const link = L.DomUtil.create('a', '', container);
+        link.href = '#';
+        link.title = 'Show/hide map legend';
+        link.innerHTML = '&#9432;';
+        link.setAttribute('role', 'button');
+        link.setAttribute('aria-label', 'Show or hide the map legend');
+        L.DomEvent.on(link, 'click', (e) => {
+          L.DomEvent.stop(e);
+          document.getElementById('legend-panel').classList.toggle('open');
+        });
+        return container;
+      }
+    });
+    map.addControl(new LegendToggleControl());
+
     document.getElementById('sidebar-close').addEventListener('click', () => {
       document.getElementById('sidebar').classList.remove('open');
     });
@@ -392,8 +485,72 @@
       return `<div class="site-tags">${tags.map(t => `<span class="tag-pill">${t}</span>`).join('')}</div>`;
     }
 
+    const SITE_TYPE_LABELS = {
+      state_park: 'State Park',
+      county_park: 'York County Park',
+      state_game_lands: 'State Game Lands',
+      lancaster_conservancy: 'Lancaster Conservancy',
+      other: 'Other',
+    };
+
+    function typeDot(props) {
+      const type = props.site_type || 'other';
+      const label = SITE_TYPE_LABELS[type] || 'Other';
+      return `<span class="type-dot ${type}" title="${label}"></span>`;
+    }
+
+    const FEEDER_ICON_SVG = `
+      <svg viewBox="3 2 18 18" aria-hidden="true">
+        <polygon points="12,2 21,9 3,9" fill="currentColor" />
+        <rect x="5" y="9" width="14" height="9" rx="0.6" fill="none" stroke="currentColor" stroke-width="1.4" />
+        <rect x="5" y="18" width="14" height="1.8" rx="0.4" fill="currentColor" />
+        <ellipse cx="12" cy="15.4" rx="3.3" ry="1.85" fill="currentColor" />
+        <ellipse cx="15.3" cy="13.8" rx="1.4" ry="1.4" fill="currentColor" />
+        <polygon points="16.6,13.4 17.8,13.8 16.6,14.2" fill="currentColor" />
+        <polygon points="10.2,13.4 6.3,10.7 9.5,15.7" fill="currentColor" />
+      </svg>
+    `;
+
+    function siteIcons(props) {
+      const icons = [];
+      if (props.ada_accessible) {
+        icons.push('<span class="icon-glyph" title="Accessible birding">&#9855;</span>');
+      }
+      if (props.feeder_station) {
+        icons.push(`<span class="icon-feeder" title="Bird feeder station">${FEEDER_ICON_SVG}</span>`);
+      }
+      if (props.restroom_available) {
+        icons.push('<span class="icon-glyph" title="Restrooms available">&#128699;</span>');
+      }
+      if (!icons.length) return '';
+      return `<div class="site-icons">${icons.join('')}</div>`;
+    }
+
+    function populateLegend() {
+      const typeRows = Object.keys(SITE_TYPE_LABELS).map(type =>
+        `<div class="legend-row"><span class="type-dot ${type}"></span> ${SITE_TYPE_LABELS[type]}</div>`
+      ).join('');
+
+      document.getElementById('legend-content').innerHTML = `
+        <div class="legend-row">
+          <div class="trail-marker legend-marker"></div> Site Location
+        </div>
+        <hr class="legend-divider">
+        ${typeRows}
+        <hr class="legend-divider">
+        <div class="legend-row"><span class="icon-glyph">&#9855;</span> Accessible Birding</div>
+        <div class="legend-row"><span class="icon-feeder">${FEEDER_ICON_SVG}</span> Bird Feeder Station</div>
+        <div class="legend-row"><span class="icon-glyph">&#128699;</span> Restrooms Available</div>
+      `;
+    }
+    populateLegend();
+
     function directionsUrl(lat, lng) {
       return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    }
+
+    function isMobileViewport() {
+      return window.matchMedia('(max-width: 768px)').matches;
     }
 
     const modalOverlay = document.getElementById('modal-overlay');
@@ -456,8 +613,9 @@
             const zoomId = 'zoom-' + Math.random().toString(36).slice(2);
 
             const popupContent = `
-              <div class="popup-title">${props.name}</div>
+              <div class="popup-title">${typeDot(props)}${props.name}</div>
               <div class="popup-address">${props.address || ''}</div>
+              ${siteIcons(props)}
               ${sidebarPills(props)}
               <p class="popup-synopsis">${synopsis(props.description)}</p>
               <div class="popup-actions">
@@ -470,7 +628,7 @@
                 <button class="popup-btn filled" id="${popupId}">Full Details</button>
               </div>
             `;
-            layer.bindPopup(popupContent, { minWidth: 230 });
+            layer.bindPopup(popupContent, { minWidth: isMobileViewport() ? 230 : 360 });
             layer.on('popupopen', () => {
               const btn = document.getElementById(popupId);
               if (btn) btn.addEventListener('click', () => openModal(props));
@@ -483,15 +641,16 @@
             const item = document.createElement('div');
             item.className = 'site-item';
             item.innerHTML = `
-              <div class="site-title">${props.name}</div>
+              <div class="site-title">${typeDot(props)}${props.name}</div>
               <div style="font-size: 0.85em; color: #555;">${props.address || ''}</div>
+              ${siteIcons(props)}
               ${sidebarPills(props)}
             `;
             item.addEventListener('click', () => {
               // Note: Leaflet expects [lat, lng], GeoJSON is [lng, lat]
               map.flyTo([lat, lng], 14);
               layer.openPopup();
-              if (window.matchMedia('(max-width: 768px)').matches) {
+              if (isMobileViewport()) {
                 document.getElementById('sidebar').classList.remove('open');
               }
             });
